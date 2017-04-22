@@ -1,0 +1,6 @@
+[package]
+name = "smallworld"
+version = "0.1.0"
+authors = ["Pirh"]
+
+[dependencies]
