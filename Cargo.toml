@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Pirh"]
 
 [dependencies]
+glium = "0.16.0"
+specs = "0.8.1"
