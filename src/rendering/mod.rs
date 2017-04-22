@@ -15,10 +15,10 @@ pub type Mesh = (VertexBufferAny, IndexBufferAny);
 #[derive(Copy, Clone)]
 struct Vertex
 {
-    position: [f32; 2],
+    offset: [f32; 2],
     uv: [f32; 2]
 }
-implement_vertex!(Vertex, position, uv);
+implement_vertex!(Vertex, offset, uv);
 
 
 pub fn load_shader<V, F>(display: &Display, vertex_source: V, fragment_source: F) -> Shader
@@ -40,10 +40,10 @@ pub fn load_shader<V, F>(display: &Display, vertex_source: V, fragment_source: F
 pub fn quad_mesh(display: &Display) -> Mesh
 {
     let vertices = [
-        Vertex { position: [-0.5, -0.5], uv: [0.0, 0.0] },
-        Vertex { position: [ 0.5, -0.5], uv: [1.0, 0.0] },
-        Vertex { position: [ 0.5,  0.5], uv: [1.0, 1.0] },
-        Vertex { position: [-0.5,  0.5], uv: [0.0, 1.0] }
+        Vertex { offset: [-0.5, -0.5], uv: [0.0, 0.0] },
+        Vertex { offset: [ 0.5, -0.5], uv: [1.0, 0.0] },
+        Vertex { offset: [ 0.5,  0.5], uv: [1.0, 1.0] },
+        Vertex { offset: [-0.5,  0.5], uv: [0.0, 1.0] }
     ];
     let indices = [0, 1, 2, 0, 2, 3_u16];
     let vertex_buffer = VertexBuffer::new(display, &vertices).expect("Failed to build vertex buffer");

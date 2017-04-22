@@ -46,3 +46,9 @@ Load texture, render it onto quad, blah blah.
 
 [2017-04-22 15:48]:
 Correct projection and display textures at pixel scale (unless I fucked something up, we'll see). Treating 1.0 unit of world space as a 16px tile. Gonna take a break now.
+
+[2017-04-22 16:02]:
+Next up, some actual game state. I'm going to use [specs](https://github.com/slide-rs/specs) for this. I've played around implementing entity systems before, but I really don't feel like I've got enough time to do it right. Plus specs is almost certainly better thought out than whatever I could throw together.
+
+[2017-04-22 16:23]:
+Got multiple entities on screen now. Not really using a proper "system" for it, since it needs to be on the main thread, but whatever, it's a similar idea.

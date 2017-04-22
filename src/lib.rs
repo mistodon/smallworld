@@ -1,8 +1,9 @@
 extern crate find_folder;
 #[macro_use] extern crate glium;
 extern crate image;
+extern crate specs;
 
-use glium::{DisplayBuild, Surface};
+use glium::{DisplayBuild};
 use glium::glutin::{Event, WindowBuilder};
 
 use std::time::{Instant};
@@ -10,8 +11,10 @@ use std::time::{Instant};
 pub mod assets;
 pub mod game;
 pub mod game_state;
+pub mod macros;
 pub mod rendering;
 pub mod state;
+pub mod systems;
 
 use game::Game;
 use game_state::GameState;
