@@ -11,3 +11,5 @@ Small World - LD 38
     I'm thinking maybe some kind of puzzle game based around managing limited space in an enclosed location.
 [2017-04-22 03:13]:
     Got a window up, clearing, and closing properly.
+[2017-04-22 03:27]:
+    Got a "game state" which fades in some blue and then exits.
