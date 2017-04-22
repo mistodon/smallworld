@@ -21,12 +21,20 @@ pub struct Destination
 pub struct Player;
 component!(Player);
 
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum Collision
+{
+    Passable,
+    Pushable,
+    Obstacle
+}
+component!(Collision);
 
 pub fn player_controls(arg: RunArg, dir: Vector2<f32>)
 {
-    let (mut motion, position, player) = arg.fetch(|w| (w.write::<Motion>(), w.read::<Position>(), w.read::<Player>()));
+    let (mut motion, positions, player, collision) = arg.fetch(|w| (w.write::<Motion>(), w.read::<Position>(), w.read::<Player>(), w.read::<Collision>()));
 
-    for (motion, position, _) in (&mut motion, &position, &player).join()
+    for (motion, position, _) in (&mut motion, &positions, &player).join()
     {
         if motion.destination.is_some()
         {
@@ -35,8 +43,23 @@ pub fn player_controls(arg: RunArg, dir: Vector2<f32>)
 
         let pos = position.0;
         let dest = pos + dir;
+        let dest_tile = dest.round_i32();
 
-        if pos.round_i32() == dest.round_i32()
+        let obstructed = {
+            let mut obstructed = false;
+            for (position, collision) in (&positions, &collision).join()
+            {
+                let pos_tile = position.0.round_i32();
+                if pos_tile == dest_tile && collision == &Collision::Obstacle
+                {
+                    obstructed = true;
+                    break;
+                }
+            }
+            obstructed
+        };
+
+        if (pos.round_i32() == dest_tile) || obstructed
         {
             continue;
         }

@@ -3,5 +3,5 @@ pub mod motion;
 pub mod visual;
 
 pub use self::basic::{Position};
-pub use self::motion::{Motion, Player};
+pub use self::motion::{Motion, Player, Collision};
 pub use self::visual::{Sprite};

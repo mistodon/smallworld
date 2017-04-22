@@ -31,10 +31,12 @@ impl State for GameState
         world.register::<Sprite>();
         world.register::<Motion>();
         world.register::<Player>();
+        world.register::<Collision>();
 
         world.create_now()
             .with(Position(vec2(0.0, 0.0)))
             .with(Sprite { region: vec2(0, 2) })
+            .with(Collision::Obstacle)
             .build();
 
         world.create_now()
