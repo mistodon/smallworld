@@ -19,6 +19,7 @@ pub mod vectors;
 
 use game::Game;
 use game_state::GameState;
+use rendering::Display;
 use state::State;
 
 pub fn run_game(scale: u32)
@@ -33,7 +34,20 @@ pub fn run_game(scale: u32)
         .unwrap();
 
     let mut game = Game::new(virtual_res);
-    let mut game_state = GameState::new(&display);
+
+    loop
+    {
+        let keep_going = run_state(&display, &mut game);
+        if !keep_going
+        {
+            break;
+        }
+    }
+}
+
+pub fn run_state(display: &Display, game: &mut Game) -> bool
+{
+    let mut game_state = GameState::new(display);
     let mut previous_frame_time = Instant::now();
 
     loop
@@ -79,15 +93,19 @@ pub fn run_game(scale: u32)
             }
         }
 
-        let state_continue = game_state.update(dt, &mut game);
-
-        if quitting || !state_continue
+        if quitting
         {
-            return;
+            return false;
+        }
+
+        let state_continue = game_state.update(dt, game);
+        if !state_continue
+        {
+            return true;
         }
 
         let mut target = display.draw();
-        game_state.draw(&mut target, &mut game);
+        game_state.draw(&mut target, game);
         target.finish().expect("Drawing failed");
     }
 }

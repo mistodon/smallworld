@@ -67,3 +67,9 @@ Added some simple collision with blocks.
 
 [2017-04-22 18:30]:
 Texture artefacts were annoying me so I disabled mipmaps (which didn't help) and now I'm rounding the position of each sprite to the nearest "pixel" (meaning nearest multiple of {scale} pixels). This seems to have worked. Although now I'm really noticing the jerkiness whenever you reach a tile and stop for one frame. Might fix it if I have time, or maybe I'll get around to animating the sprites and that'll cover it up a bit?
+
+[2017-04-22 19:10]:
+Took a break - just started working again. Going to add a lose condition now - when you collide with the other guy.
+
+[2017-04-22 19:32]:
+OK so now when you touch the door, or the guy, the level restarts.

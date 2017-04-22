@@ -32,11 +32,19 @@ impl State for GameState
         world.register::<Motion>();
         world.register::<Player>();
         world.register::<Collision>();
+        world.register::<Hazard>();
+        world.register::<Goal>();
 
         world.create_now()
             .with(Position(vec2(0.0, 0.0)))
             .with(Sprite { region: vec2(0, 2) })
             .with(Collision::Obstacle)
+            .build();
+
+        world.create_now()
+            .with(Position(vec2(0.0, 4.0)))
+            .with(Sprite { region: vec2(0, 3) })
+            .with(Goal)
             .build();
 
         world.create_now()
@@ -50,6 +58,7 @@ impl State for GameState
             .with(Position(vec2(4.0, 0.0)))
             .with(Sprite { region: vec2(0, 1) })
             .with(Motion { destination: Some(motion::Destination { position: vec2(4.0, 4.0), direction: vec2(0.0, 1.0) }), speed: 4.0 })
+            .with(Hazard)
             .build();
 
         let planner = Planner::new(world);
@@ -72,9 +81,17 @@ impl State for GameState
         self.planner.run_custom(move |arg| motion::player_controls(arg, player_control_direction));
         self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt));
 
+        let exiting_state: bool;
+        {
+            let world = self.planner.mut_world();
+            let victory = victory::determine_victory_from_goal(world);
+            let gameover = victory::determine_gameover_from_hazard(world);
+            exiting_state = victory | gameover;
+        }
+
         self.planner.wait();
 
-        true
+        !exiting_state
     }
 
     fn draw(&mut self, target: &mut Frame, game: &mut Game)
