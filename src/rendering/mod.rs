@@ -2,7 +2,9 @@ use glium::{Program, Texture2d};
 use glium::backend::glutin_backend::GlutinFacade;
 use glium::index::{IndexBufferAny, IndexBuffer, PrimitiveType};
 use glium::program::{ProgramCreationInput};
+use glium::texture::{RawImage2d};
 use glium::vertex::{VertexBufferAny, VertexBuffer};
+use image::{load_from_memory_with_format, ImageFormat};
 
 pub type Display = GlutinFacade;
 pub type Shader = Program;
@@ -13,9 +15,10 @@ pub type Mesh = (VertexBufferAny, IndexBufferAny);
 #[derive(Copy, Clone)]
 struct Vertex
 {
-    position: [f32; 2]
+    position: [f32; 2],
+    uv: [f32; 2]
 }
-implement_vertex!(Vertex, position);
+implement_vertex!(Vertex, position, uv);
 
 
 pub fn load_shader<V, F>(display: &Display, vertex_source: V, fragment_source: F) -> Shader
@@ -37,13 +40,21 @@ pub fn load_shader<V, F>(display: &Display, vertex_source: V, fragment_source: F
 pub fn quad_mesh(display: &Display) -> Mesh
 {
     let vertices = [
-        Vertex { position: [-0.5, -0.5] },
-        Vertex { position: [ 0.5, -0.5] },
-        Vertex { position: [ 0.5,  0.5] },
-        Vertex { position: [-0.5,  0.5] }
+        Vertex { position: [-0.5, -0.5], uv: [0.0, 0.0] },
+        Vertex { position: [ 0.5, -0.5], uv: [1.0, 0.0] },
+        Vertex { position: [ 0.5,  0.5], uv: [1.0, 1.0] },
+        Vertex { position: [-0.5,  0.5], uv: [0.0, 1.0] }
     ];
     let indices = [0, 1, 2, 0, 2, 3_u16];
     let vertex_buffer = VertexBuffer::new(display, &vertices).expect("Failed to build vertex buffer");
     let index_buffer = IndexBuffer::new(display, PrimitiveType::TrianglesList, &indices).expect("Failed to build index buffer");
     (vertex_buffer.into(), index_buffer.into())
+}
+
+pub fn load_texture(display: &Display, bytes: &[u8]) -> Texture
+{
+    let image = load_from_memory_with_format(bytes, ImageFormat::PNG).expect("Failed to decode image").to_rgba();
+    let image_dimensions = image.dimensions();
+    let image = RawImage2d::from_raw_rgba_reversed(image.into_raw(), image_dimensions);
+    Texture2d::new(display, image).expect("Failed to load texture")
 }

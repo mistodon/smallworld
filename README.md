@@ -40,3 +40,6 @@ Got shaders loading - but not doing anything with them yet. The `find_folder` cr
 Build a quad mesh, drawing it on screeeen.
 
 It's incredibly likely that this whole game is going to use one mesh, one shader, and one texture.
+
+[2017-04-22 15:37]:
+Load texture, render it onto quad, blah blah.

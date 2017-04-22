@@ -1,6 +1,7 @@
-use glium::{self, DrawParameters, DepthTest, Depth};
+use glium::{DrawParameters, DepthTest, Depth, Blend};
+use glium::uniforms::{Sampler, MinifySamplerFilter, MagnifySamplerFilter, SamplerWrapFunction};
 
-use assets::{get_asset_string};
+use assets::{get_asset_string, get_asset_bytes};
 use rendering::*;
 use state::*;
 
@@ -8,6 +9,7 @@ pub struct GameState
 {
     shader: Shader,
     mesh: Mesh,
+    texture: Texture,
     time: f64
 }
 
@@ -17,10 +19,12 @@ impl State for GameState
     {
         let shader = load_shader(display, &get_asset_string("shaders/sprite.vs"), &get_asset_string("shaders/sprite.fs"));
         let mesh = quad_mesh(display);
+        let texture = load_texture(display, &get_asset_bytes("atlas.png"));
         GameState
         {
             shader: shader,
             mesh: mesh,
+            texture: texture,
             time: 0.0
         }
     }
@@ -34,13 +38,19 @@ impl State for GameState
     fn draw(&mut self, target: &mut Frame)
     {
         target.clear_color_srgb_and_depth((0.0, 0.0, self.time as f32, 1.0), 1.0);
+
+        let colormap = Sampler::new(&self.texture)
+            .minify_filter(MinifySamplerFilter::Nearest)
+            .magnify_filter(MagnifySamplerFilter::Nearest)
+            .wrap_function(SamplerWrapFunction::Clamp);
+
         target.draw(
             &self.mesh.0,
             &self.mesh.1,
             &self.shader,
             &uniform!
             {
-
+                colormap: colormap
             },
             &DrawParameters
             {
@@ -50,6 +60,7 @@ impl State for GameState
                     write: true,
                     .. Default::default()
                 },
+                blend: Blend::alpha_blending(),
                 .. Default::default()
             }).unwrap();
     }

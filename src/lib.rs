@@ -1,5 +1,6 @@
 extern crate find_folder;
 #[macro_use] extern crate glium;
+extern crate image;
 
 use glium::{DisplayBuild, Surface};
 use glium::glutin::{Event, WindowBuilder};

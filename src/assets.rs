@@ -20,3 +20,13 @@ pub fn get_asset_string<P>(path: P) -> String
     file.read_to_string(&mut contents).expect(&format!("Failed to read file '{:?}'", path));
     contents
 }
+
+pub fn get_asset_bytes<P>(path: P) -> Vec<u8>
+    where P: AsRef<Path>
+{
+    let path = get_asset_path(path);
+    let mut file = File::open(&path).expect(&format!("Could not open file '{:?}'", path));
+    let mut contents = Vec::new();
+    file.read_to_end(&mut contents).expect(&format!("Failed to read file '{:?}'", path));
+    contents
+}

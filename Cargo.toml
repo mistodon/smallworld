@@ -6,4 +6,5 @@ authors = ["Pirh"]
 [dependencies]
 find_folder = "0.3.0"
 glium = "0.16.0"
+image = "0.12.4"
 specs = "0.8.1"
