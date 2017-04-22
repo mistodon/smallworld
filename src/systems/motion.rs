@@ -1,16 +1,9 @@
 use std::collections::VecDeque;
 
-use specs::{RunArg, Join, World, Gate};
+use specs::{RunArg, Join};
 
 use systems::{Position};
 use vectors::*;
-
-#[derive(Copy, Clone)]
-pub enum MovementPhase
-{
-    Waiting,
-    Moving
-}
 
 #[derive(Default)]
 pub struct Motion
@@ -27,7 +20,11 @@ pub struct Destination
     pub direction: Vector2<f32>
 }
 
-pub struct Player;
+#[derive(Default)]
+pub struct Player
+{
+    pub moves: u32
+}
 component!(Player);
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -41,7 +38,8 @@ component!(Collision);
 
 pub struct PlayerTracker
 {
-    pub steps: VecDeque<Vector2<i32>>
+    pub steps: VecDeque<Vector2<i32>>,
+    pub moves: u32
 }
 component!(PlayerTracker);
 
@@ -50,15 +48,15 @@ impl PlayerTracker
     pub fn new<T>(steps: T) -> Self
         where T: Into<VecDeque<Vector2<i32>>>
     {
-        PlayerTracker { steps: steps.into() }
+        PlayerTracker { steps: steps.into(), moves: 0 }
     }
 }
 
 pub fn player_controls(arg: RunArg, dir: Vector2<f32>)
 {
-    let (mut motion, positions, player, collision) = arg.fetch(|w| (w.write::<Motion>(), w.read::<Position>(), w.read::<Player>(), w.read::<Collision>()));
+    let (mut motion, positions, mut player, collision) = arg.fetch(|w| (w.write::<Motion>(), w.read::<Position>(), w.write::<Player>(), w.read::<Collision>()));
 
-    for (motion, position, _) in (&mut motion, &positions, &player).join()
+    for (motion, position, player) in (&mut motion, &positions, &mut player).join()
     {
         if motion.destination.is_some()
         {
@@ -90,6 +88,7 @@ pub fn player_controls(arg: RunArg, dir: Vector2<f32>)
 
         let dir = dest - pos;
         motion.destination = Some(Destination { position: dest, direction: dir });
+        player.moves += 1;
     }
 }
 
@@ -121,46 +120,17 @@ pub fn move_towards_destinations(arg: RunArg, dt: f64)
     }
 }
 
-pub fn determine_movement_phase(world: &mut World, current_phase: MovementPhase) -> MovementPhase
-{
-    let (player, motion) = (world.read::<Player>().pass(), world.read::<Motion>().pass());
-    match current_phase
-    {
-        MovementPhase::Waiting =>
-        {
-            for (_player, motion) in (&player, &motion).join()
-            {
-                if motion.destination.is_none()
-                {
-                    return MovementPhase::Waiting;
-                }
-            }
-            MovementPhase::Moving
-        },
-        MovementPhase::Moving =>
-        {
-            for motion in (&motion).join()
-            {
-                if motion.destination.is_some()
-                {
-                    return MovementPhase::Moving;
-                }
-            }
-            MovementPhase::Waiting
-        }
-    }
-}
-
-
 pub fn track_player(arg: RunArg)
 {
     let (mut tracker, mut motion, position, player) = arg.fetch(|w| (w.write::<PlayerTracker>(), w.write::<Motion>(), w.read::<Position>(), w.read::<Player>()));
 
     // We're only going to acknowledge one player right now
     let player_pos: Vector2<i32>;
+    let player_moves: u32;
     {
-        let (_player, position) = (&player, &position).join().next().unwrap();
+        let (player, position) = (&player, &position).join().next().expect("No player found");
         player_pos = position.0.round_i32();
+        player_moves = player.moves;
     }
 
     for (tracker, motion, position) in (&mut tracker, &mut motion, &position).join()
@@ -170,7 +140,7 @@ pub fn track_player(arg: RunArg)
             tracker.steps.push_back(player_pos);
         }
 
-        if motion.destination.is_none()
+        if motion.destination.is_none() && tracker.moves < player_moves
         {
             if let Some(next_step) = tracker.steps.pop_front()
             {
@@ -178,6 +148,7 @@ pub fn track_player(arg: RunArg)
                 let dest = next_step.to_f32();
                 let dir = dest - pos;
                 motion.destination = Some(Destination { position: dest, direction: dir });
+                tracker.moves += 1;
             }
         }
     }
