@@ -85,3 +85,9 @@ That's the bare bones of it. If by some miracle I have time to do more, I will.
 Alright, the shady dude follows you around now, but unfortunately it's impossible to collide with him since you're moving in perfect lockstep (you always change tiles at the same time and usually don't have the exact same destination).
 
 To fix this, I'm probably going to put a slight delay on the stalker's movement - like half a step.
+
+[2017-04-22 21:38]:
+Delay seemed to work, though it was messier than I'd hoped. Think it's about time to write a level parser!
+
+[2017-04-22 22:33]:
+We can now parse a whole bunch of levels from a yaml file! Hooray! However, this kind of breaks the stalker, who needs initialized with a path to the player. It was previously hardcoded, so I'll need to fill it in automatically. Hopefully this will disappear when a bit of pathfinding gets added. (When?)

@@ -9,9 +9,28 @@ use vectors::*;
 pub struct Motion
 {
     pub destination: Option<Destination>,
-    pub speed: f32
+    pub speed: f32,
+    pub delay_remaining: f32
 }
 component!(Motion);
+
+impl Motion
+{
+    pub fn new(speed: f32) -> Self
+    {
+        Motion
+        {
+            destination: None,
+            speed: speed,
+            delay_remaining: 0.0
+        }
+    }
+
+    pub fn move_from_to(&mut self, from_pos: Vector2<f32>, to_pos: Vector2<f32>)
+    {
+        self.destination = Some(Destination { position: to_pos, direction: to_pos - from_pos });
+    }
+}
 
 #[derive(Copy, Clone)]
 pub struct Destination
@@ -39,16 +58,17 @@ component!(Collision);
 pub struct PlayerTracker
 {
     pub steps: VecDeque<Vector2<i32>>,
-    pub moves: u32
+    pub moves: u32,
+    pub delay: f32
 }
 component!(PlayerTracker);
 
 impl PlayerTracker
 {
-    pub fn new<T>(steps: T) -> Self
+    pub fn new<T>(delay: f32, steps: T) -> Self
         where T: Into<VecDeque<Vector2<i32>>>
     {
-        PlayerTracker { steps: steps.into(), moves: 0 }
+        PlayerTracker { steps: steps.into(), moves: 0, delay: delay }
     }
 }
 
@@ -86,8 +106,7 @@ pub fn player_controls(arg: RunArg, dir: Vector2<f32>)
             continue;
         }
 
-        let dir = dest - pos;
-        motion.destination = Some(Destination { position: dest, direction: dir });
+        motion.move_from_to(pos, dest);
         player.moves += 1;
     }
 }
@@ -102,6 +121,12 @@ pub fn move_towards_destinations(arg: RunArg, dt: f64)
         let destination = motion.destination;
         if let Some(destination) = destination
         {
+            if motion.delay_remaining > 0.0
+            {
+                motion.delay_remaining -= dt;
+                continue;
+            }
+
             let vel = destination.direction * motion.speed;
             let new_pos = position.0 + (vel * dt);
             let dest = destination.position;
@@ -140,15 +165,21 @@ pub fn track_player(arg: RunArg)
             tracker.steps.push_back(player_pos);
         }
 
-        if motion.destination.is_none() && tracker.moves < player_moves
+        if motion.destination.is_none()
         {
-            if let Some(next_step) = tracker.steps.pop_front()
+            if tracker.moves < player_moves
             {
-                let pos = position.0;
-                let dest = next_step.to_f32();
-                let dir = dest - pos;
-                motion.destination = Some(Destination { position: dest, direction: dir });
-                tracker.moves += 1;
+                if let Some(next_step) = tracker.steps.pop_front()
+                {
+                    let pos = position.0;
+                    let dest = next_step.to_f32();
+                    motion.move_from_to(pos, dest);
+                    tracker.moves += 1;
+                }
+            }
+            else if tracker.moves == player_moves
+            {
+                motion.delay_remaining = tracker.delay;
             }
         }
     }

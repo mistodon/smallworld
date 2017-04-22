@@ -15,12 +15,13 @@ pub struct GameState
     mesh: Mesh,
     atlas: TextureAtlas,
     planner: Planner<()>,
+    camera_pos: Vector2<f32>,
     time: f64
 }
 
 impl State for GameState
 {
-    fn new(display: &Display) -> Self
+    fn new(display: &Display, game: &mut Game) -> Self
     {
         let shader = load_shader(display, &get_asset_string("shaders/sprite.vs"), &get_asset_string("shaders/sprite.fs"));
         let mesh = quad_mesh(display);
@@ -36,33 +37,44 @@ impl State for GameState
         world.register::<Goal>();
         world.register::<PlayerTracker>();
 
-        world.create_now()
-            .with(Position(vec2(0.0, -1.0)))
-            .with(Sprite { region: vec2(0, 2) })
-            .with(Collision::Obstacle)
-            .build();
+        let camera_pos: Vector2<f32>;
+        {
+            let level = &game.levels[0];
+            camera_pos = level.midpoint;
 
-        world.create_now()
-            .with(Position(vec2(0.0, 4.0)))
-            .with(Sprite { region: vec2(0, 3) })
-            .with(Goal)
-            .build();
+            world.create_now()
+                .with(Position(level.player_pos))
+                .with(Sprite { region: vec2(0, 0) })
+                .with(Motion::new(4.0))
+                .with(Player::default())
+                .build();
 
-        world.create_now()
-            .with(Position(vec2(2.0, 0.0)))
-            .with(Sprite { region: vec2(0, 0) })
-            .with(Motion { destination: None, speed: 4.0 })
-            .with(Player::default())
-            .build();
+            world.create_now()
+                .with(Position(level.stalker_pos))
+                .with(Sprite { region: vec2(0, 1) })
+                .with(Motion::new(4.0))
+                .with(Hazard)
+                // .with(PlayerTracker::new(0.25, vec![vec2(0, 0), vec2(1, 0)]))
+                .build();
 
+            for door in &level.doors
+            {
+                world.create_now()
+                    .with(Position(*door))
+                    .with(Sprite { region: vec2(0, 3) })
+                    .with(Goal)
+                    .build();
+            }
 
-        world.create_now()
-            .with(Position(vec2(-1.0, 0.0)))
-            .with(Sprite { region: vec2(0, 1) })
-            .with(Motion { destination: None, speed: 4.0 })
-            .with(Hazard)
-            .with(PlayerTracker::new(vec![vec2(0, 0), vec2(1, 0)]))
-            .build();
+            for block in &level.blocks
+            {
+                world.create_now()
+                    .with(Position(*block))
+                    .with(Sprite { region: vec2(0, 2) })
+                    .with(Collision::Obstacle)
+                    .build();
+            }
+        }
 
         let planner = Planner::new(world);
 
@@ -72,6 +84,7 @@ impl State for GameState
             mesh: mesh,
             atlas: atlas,
             planner: planner,
+            camera_pos: camera_pos,
             time: 0.0
         }
     }
@@ -126,6 +139,7 @@ impl State for GameState
                     &uniform!
                     {
                         projection: projection,
+                        camera_pos: self.camera_pos.components,
                         colormap: colormap,
                         position: rounded_position.components,
                         uv_offset: uv_offset,

@@ -1,6 +1,9 @@
 extern crate find_folder;
 #[macro_use] extern crate glium;
 extern crate image;
+#[macro_use] extern crate serde_derive;
+extern crate serde_yaml;
+
 extern crate specs;
 
 use glium::{DisplayBuild};
@@ -47,7 +50,7 @@ pub fn run_game(scale: u32)
 
 pub fn run_state(display: &Display, game: &mut Game) -> bool
 {
-    let mut game_state = GameState::new(display);
+    let mut game_state = GameState::new(display, game);
     let mut previous_frame_time = Instant::now();
 
     loop
@@ -58,6 +61,7 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
         previous_frame_time = current_time;
 
         let mut quitting = false;
+        let mut reset_key_pressed = false;
 
         {
             for event in display.poll_events()
@@ -74,6 +78,7 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
                                     VirtualKeyCode::Right => game.input.right = true,
                                     VirtualKeyCode::Up => game.input.up = true,
                                     VirtualKeyCode::Down => game.input.down = true,
+                                    VirtualKeyCode::R => reset_key_pressed = true,
                                     VirtualKeyCode::Escape => quitting = true,
                                     _ => ()
                                 },
@@ -91,6 +96,12 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
                     _ => ()
                 }
             }
+        }
+
+        if cfg!(debug_assertions) && reset_key_pressed
+        {
+            game.levels = assets::load_levels("levels.yaml");
+            return true;
         }
 
         if quitting

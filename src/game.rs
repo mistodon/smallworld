@@ -1,10 +1,12 @@
+use assets::{self, Level};
 use vectors::*;
 
 pub struct Game
 {
     pub resolution: (u32, u32),
     pub tile_size: u32,
-    pub input: GameInput
+    pub input: GameInput,
+    pub levels: Vec<Level>
 }
 
 #[derive(Default)]
@@ -24,7 +26,8 @@ impl Game
         {
             resolution: resolution,
             tile_size: 16,
-            input: GameInput::default()
+            input: GameInput::default(),
+            levels: assets::load_levels("levels.yaml")
         }
     }
 }

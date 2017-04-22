@@ -5,7 +5,7 @@ use rendering::*;
 
 pub trait State
 {
-    fn new(display: &Display) -> Self;
+    fn new(display: &Display, game: &mut Game) -> Self;
     fn update(&mut self, dt: f64, game: &mut Game) -> bool;
     fn draw(&mut self, target: &mut Frame, game: &mut Game);
 }
