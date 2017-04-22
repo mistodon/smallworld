@@ -2,5 +2,5 @@ extern crate smallworld;
 
 fn main()
 {
-    smallworld::run_game();
+    smallworld::run_game(3);
 }

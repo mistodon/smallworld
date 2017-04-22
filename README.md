@@ -43,3 +43,6 @@ It's incredibly likely that this whole game is going to use one mesh, one shader
 
 [2017-04-22 15:37]:
 Load texture, render it onto quad, blah blah.
+
+[2017-04-22 15:48]:
+Correct projection and display textures at pixel scale (unless I fucked something up, we'll see). Treating 1.0 unit of world space as a 16px tile. Gonna take a break now.

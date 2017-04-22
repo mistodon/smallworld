@@ -58,3 +58,12 @@ pub fn load_texture(display: &Display, bytes: &[u8]) -> Texture
     let image = RawImage2d::from_raw_rgba_reversed(image.into_raw(), image_dimensions);
     Texture2d::new(display, image).expect("Failed to load texture")
 }
+
+pub fn calculate_projection(resolution: (u32, u32), tile_size: u32) -> [f32; 2]
+{
+    let (w, h) = resolution;
+    let (w, h) = (w as f32, h as f32);
+    let tile_size = tile_size as f32;
+    let projection = [2.0 * tile_size / w, 2.0 * tile_size / h];
+    projection
+}
