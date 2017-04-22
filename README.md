@@ -35,3 +35,8 @@ Alright, slept in today, but I think I have a stronger idea for what I want to d
 
 [2017-04-22 14:59]:
 Got shaders loading - but not doing anything with them yet. The `find_folder` crate, and the `cargo check` command are insanely useful.
+
+[2017-04-22 15:09]:
+Build a quad mesh, drawing it on screeeen.
+
+It's incredibly likely that this whole game is going to use one mesh, one shader, and one texture.
