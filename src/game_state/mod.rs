@@ -1,15 +1,24 @@
+use assets::{get_asset_string};
+use rendering::*;
 use state::*;
 
 pub struct GameState
 {
+    shader: Shader,
+    // mesh: Mesh,
     time: f64
 }
 
 impl State for GameState
 {
-    fn new() -> Self
+    fn new(display: &Display) -> Self
     {
-        GameState { time: 0.0 }
+        let shader = load_shader(display, &get_asset_string("shaders/sprite.vs"), &get_asset_string("shaders/sprite.fs"));
+        GameState
+        {
+            shader: shader,
+            time: 0.0
+        }
     }
 
     fn update(&mut self, dt: f64) -> bool

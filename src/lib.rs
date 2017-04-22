@@ -1,3 +1,4 @@
+extern crate find_folder;
 #[macro_use] extern crate glium;
 
 use glium::{DisplayBuild, Surface};
@@ -5,8 +6,10 @@ use glium::glutin::{Event, WindowBuilder};
 
 use std::time::{Instant};
 
-pub mod state;
+pub mod assets;
 pub mod game_state;
+pub mod rendering;
+pub mod state;
 
 use state::State;
 use game_state::GameState;
@@ -22,7 +25,7 @@ pub fn run_game()
         .build_glium()
         .unwrap();
 
-    let mut game_state = GameState::new();
+    let mut game_state = GameState::new(&display);
     let mut previous_frame_time = Instant::now();
 
     loop

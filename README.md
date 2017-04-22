@@ -29,3 +29,9 @@ Not sure how much I like this idea, but we'll see how I feel in a bit.
 
 [2017-04-22 03:40]:
 Note to self, don't use absurd formatting in markdown files.
+
+[2017-04-22 14:27]:
+Alright, slept in today, but I think I have a stronger idea for what I want to do now. I'll describe it as I go along.
+
+[2017-04-22 14:59]:
+Got shaders loading - but not doing anything with them yet. The `find_folder` crate, and the `cargo check` command are insanely useful.
