@@ -54,7 +54,7 @@ impl State for GameState
                 .with(Sprite { region: vec2(0, 1) })
                 .with(Motion::new(4.0))
                 .with(Hazard)
-                // .with(PlayerTracker::new(0.25, vec![vec2(0, 0), vec2(1, 0)]))
+                .with(PlayerTracker::new(0.25, level.initial_stalker_path.clone()))
                 .build();
 
             for door in &level.doors
@@ -66,11 +66,11 @@ impl State for GameState
                     .build();
             }
 
-            for block in &level.blocks
+            for &(style, pos) in &level.blocks
             {
                 world.create_now()
-                    .with(Position(*block))
-                    .with(Sprite { region: vec2(0, 2) })
+                    .with(Position(pos))
+                    .with(Sprite { region: vec2(style, 2) })
                     .with(Collision::Obstacle)
                     .build();
             }

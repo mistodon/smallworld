@@ -64,7 +64,8 @@ pub fn load_levels<P>(path: P) -> Vec<Level>
                     "P" => player_pos = Some(tilepos),
                     "S" => stalker_pos = Some(tilepos),
                     "D" => doors.push(tilepos),
-                    "=" => blocks.push(tilepos),
+                    "=" => blocks.push((0, tilepos)),
+                    ";" => blocks.push((1, tilepos)),
                     "." => (),
                     other => panic!(format!("Found unparsable character in level file: '{}'", other))
                 }
@@ -72,15 +73,33 @@ pub fn load_levels<P>(path: P) -> Vec<Level>
         }
 
         let midpoint = vec2(width as f32, height as f32) * 0.5 + vec2(0.0, -0.5);
-        assert!(doors.len() > 0);
+        assert!(doors.len() > 0, "No doors in level!");
+
+        let player_pos = player_pos.expect("No player position in level");
+        let stalker_pos = stalker_pos.expect("No stalker position in level");
+
+        let mut initial_stalker_path = Vec::new();
+        {
+            let disp = (player_pos - stalker_pos).round_i32();
+            assert!(disp.components[0] == 0 || disp.components[1] == 0, "Stalker must be in a straight line from player");
+
+            let steps = max(disp.components[0].abs(), disp.components[1].abs());
+            let delta = vec2(disp.components[0] / steps, disp.components[1] / steps);
+            for i in 1..steps
+            {
+                initial_stalker_path.push(stalker_pos.round_i32() + (delta * i));
+            }
+        }
+
         levels.push(Level
         {
             name: name,
             midpoint: midpoint,
-            player_pos: player_pos.expect("No player position in level"),
-            stalker_pos: stalker_pos.expect("No stalker position in level"),
+            player_pos: player_pos,
+            stalker_pos: stalker_pos,
             doors: doors,
-            blocks: blocks
+            blocks: blocks,
+            initial_stalker_path: initial_stalker_path
         });
     }
 
@@ -107,5 +126,6 @@ pub struct Level
     pub player_pos: Vector2<f32>,
     pub stalker_pos: Vector2<f32>,
     pub doors: Vec<Vector2<f32>>,
-    pub blocks: Vec<Vector2<f32>>
+    pub blocks: Vec<(u32, Vector2<f32>)>,
+    pub initial_stalker_path: Vec<Vector2<i32>>
 }

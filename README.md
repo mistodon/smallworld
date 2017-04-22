@@ -91,3 +91,6 @@ Delay seemed to work, though it was messier than I'd hoped. Think it's about tim
 
 [2017-04-22 22:33]:
 We can now parse a whole bunch of levels from a yaml file! Hooray! However, this kind of breaks the stalker, who needs initialized with a path to the player. It was previously hardcoded, so I'll need to fill it in automatically. Hopefully this will disappear when a bit of pathfinding gets added. (When?)
+
+[2017-04-22 22:56]:
+Stalker path is now fixed, plus the level looks a little prettier now.
