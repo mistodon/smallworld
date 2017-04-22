@@ -2,7 +2,7 @@ use glium::{Program, Texture2d};
 use glium::backend::glutin_backend::GlutinFacade;
 use glium::index::{IndexBufferAny, IndexBuffer, PrimitiveType};
 use glium::program::{ProgramCreationInput};
-use glium::texture::{RawImage2d};
+use glium::texture::{RawImage2d, MipmapsOption};
 use glium::vertex::{VertexBufferAny, VertexBuffer};
 use image::{load_from_memory_with_format, ImageFormat};
 
@@ -74,7 +74,7 @@ pub fn load_texture(display: &Display, bytes: &[u8]) -> (Texture, (u32, u32))
     let image = load_from_memory_with_format(bytes, ImageFormat::PNG).expect("Failed to decode image").to_rgba();
     let image_dimensions = image.dimensions();
     let image = RawImage2d::from_raw_rgba_reversed(image.into_raw(), image_dimensions);
-    let texture = Texture2d::new(display, image).expect("Failed to load texture");
+    let texture = Texture2d::with_mipmaps(display, image, MipmapsOption::NoMipmap).expect("Failed to load texture");
     (texture, image_dimensions)
 }
 
