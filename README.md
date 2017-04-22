@@ -94,3 +94,6 @@ We can now parse a whole bunch of levels from a yaml file! Hooray! However, this
 
 [2017-04-22 22:56]:
 Stalker path is now fixed, plus the level looks a little prettier now.
+
+[2017-04-22 23:09]:
+Sorting sprites by layer now so I can put a door in front of a wall.

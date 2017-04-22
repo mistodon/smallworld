@@ -44,24 +44,29 @@ impl State for GameState
 
             world.create_now()
                 .with(Position(level.player_pos))
-                .with(Sprite { region: vec2(0, 0) })
+                .with(Sprite { region: vec2(0, 0), layer: visual::ACTOR_LAYER })
                 .with(Motion::new(4.0))
                 .with(Player::default())
                 .build();
 
             world.create_now()
                 .with(Position(level.stalker_pos))
-                .with(Sprite { region: vec2(0, 1) })
+                .with(Sprite { region: vec2(0, 1), layer: visual::ACTOR_LAYER })
                 .with(Motion::new(4.0))
                 .with(Hazard)
-                .with(PlayerTracker::new(0.25, level.initial_stalker_path.clone()))
+                .with(PlayerTracker::new(0.15, level.initial_stalker_path.clone()))
                 .build();
 
             for door in &level.doors
             {
                 world.create_now()
                     .with(Position(*door))
-                    .with(Sprite { region: vec2(0, 3) })
+                    .with(Sprite { region: vec2(1, 2), layer: visual::BG_LAYER })
+                    .build();
+
+                world.create_now()
+                    .with(Position(*door))
+                    .with(Sprite { region: vec2(0, 3), layer: visual::OBJECT_LAYER })
                     .with(Goal)
                     .build();
             }
@@ -70,7 +75,7 @@ impl State for GameState
             {
                 world.create_now()
                     .with(Position(pos))
-                    .with(Sprite { region: vec2(style, 2) })
+                    .with(Sprite { region: vec2(style, 2), layer: visual::BG_LAYER })
                     .with(Collision::Obstacle)
                     .build();
             }
@@ -126,12 +131,22 @@ impl State for GameState
         {
             let world = self.planner.mut_world();
             let (position, sprite) = (world.read::<Position>().pass(), world.read::<Sprite>().pass());
+
+            let mut render_buffer = Vec::new();
+
             for (position, sprite) in (&position, &sprite).join()
             {
                 let (uv_offset, uv_scale) = self.atlas.get_uv_offset_scale(sprite.region.components[0], sprite.region.components[1]);
                 let pixel_position = (position.0 * game.tile_size as f32).round_i32();
                 let rounded_position = vec2(pixel_position.components[0] as f32, pixel_position.components[1] as f32) * (1.0 / game.tile_size as f32);
 
+                render_buffer.push((sprite.layer, rounded_position.components, uv_offset, uv_scale));
+            }
+
+            render_buffer.sort_by_key(|k| k.0);
+
+            for (_layer, position, uv_offset, uv_scale) in render_buffer
+            {
                 target.draw(
                     &self.mesh.0,
                     &self.mesh.1,
@@ -141,7 +156,7 @@ impl State for GameState
                         projection: projection,
                         camera_pos: self.camera_pos.components,
                         colormap: colormap,
-                        position: rounded_position.components,
+                        position: position,
                         uv_offset: uv_offset,
                         uv_scale: uv_scale
                     },
@@ -150,7 +165,7 @@ impl State for GameState
                         depth: Depth
                         {
                             test: DepthTest::IfLess,
-                            write: true,
+                            write: false,
                             .. Default::default()
                         },
                         blend: Blend::alpha_blending(),
