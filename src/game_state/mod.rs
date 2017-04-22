@@ -7,6 +7,7 @@ use game::Game;
 use rendering::*;
 use state::*;
 use systems::*;
+use vectors::*;
 
 pub struct GameState
 {
@@ -28,15 +29,23 @@ impl State for GameState
         let mut world = World::new();
         world.register::<Position>();
         world.register::<Sprite>();
+        world.register::<Motion>();
 
         world.create_now()
-            .with(Position([0.0, 0.0]))
+            .with(Position(vec2(0.0, 0.0)))
             .with(Sprite)
             .build();
 
         world.create_now()
-            .with(Position([2.0, 0.0]))
+            .with(Position(vec2(2.0, 0.0)))
             .with(Sprite)
+            .with(Motion::default())
+            .build();
+
+        world.create_now()
+            .with(Position(vec2(4.0, 0.0)))
+            .with(Sprite)
+            .with(Motion { destination: Some(motion::Destination { position: vec2(4.0, 4.0), direction: vec2(0.0, 1.0) }) })
             .build();
 
         let planner = Planner::new(world);
@@ -55,9 +64,11 @@ impl State for GameState
     {
         self.time += dt;
 
+        self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt));
+
         self.planner.wait();
 
-        self.time < 1.0
+        true
     }
 
     fn draw(&mut self, target: &mut Frame, game: &mut Game)
@@ -84,7 +95,7 @@ impl State for GameState
                     {
                         projection: projection,
                         colormap: colormap,
-                        position: position.0
+                        position: position.0.components
                     },
                     &DrawParameters
                     {

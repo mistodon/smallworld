@@ -1,2 +1,4 @@
-pub struct Position(pub [f32; 2]);
+use vectors::*;
+
+pub struct Position(pub Vector2<f32>);
 component!(Position);

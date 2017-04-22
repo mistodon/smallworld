@@ -15,6 +15,7 @@ pub mod macros;
 pub mod rendering;
 pub mod state;
 pub mod systems;
+pub mod vectors;
 
 use game::Game;
 use game_state::GameState;

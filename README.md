@@ -52,3 +52,6 @@ Next up, some actual game state. I'm going to use [specs](https://github.com/sli
 
 [2017-04-22 16:23]:
 Got multiple entities on screen now. Not really using a proper "system" for it, since it needs to be on the main thread, but whatever, it's a similar idea.
+
+[2017-04-22 17:12]:
+Added motion system from a position to a destination. Also spent probably too long on vector operators - use a stock library next time.
