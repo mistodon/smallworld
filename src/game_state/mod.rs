@@ -15,6 +15,7 @@ pub struct GameState
     mesh: Mesh,
     atlas: TextureAtlas,
     planner: Planner<()>,
+    phase: motion::MovementPhase,
     time: f64
 }
 
@@ -34,9 +35,10 @@ impl State for GameState
         world.register::<Collision>();
         world.register::<Hazard>();
         world.register::<Goal>();
+        world.register::<PlayerTracker>();
 
         world.create_now()
-            .with(Position(vec2(0.0, 0.0)))
+            .with(Position(vec2(0.0, -1.0)))
             .with(Sprite { region: vec2(0, 2) })
             .with(Collision::Obstacle)
             .build();
@@ -54,11 +56,13 @@ impl State for GameState
             .with(Player)
             .build();
 
+
         world.create_now()
-            .with(Position(vec2(4.0, 0.0)))
+            .with(Position(vec2(-1.0, 0.0)))
             .with(Sprite { region: vec2(0, 1) })
-            .with(Motion { destination: Some(motion::Destination { position: vec2(4.0, 4.0), direction: vec2(0.0, 1.0) }), speed: 4.0 })
+            .with(Motion { destination: None, speed: 4.0 })
             .with(Hazard)
+            .with(PlayerTracker::new(vec![vec2(0, 0), vec2(1, 0)]))
             .build();
 
         let planner = Planner::new(world);
@@ -69,6 +73,7 @@ impl State for GameState
             mesh: mesh,
             atlas: atlas,
             planner: planner,
+            phase: motion::MovementPhase::Waiting,
             time: 0.0
         }
     }
@@ -78,15 +83,25 @@ impl State for GameState
         self.time += dt;
         let player_control_direction = game.input.dir();
 
-        self.planner.run_custom(move |arg| motion::player_controls(arg, player_control_direction));
-        self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt));
+        match self.phase
+        {
+            motion::MovementPhase::Waiting =>
+            {
+                self.planner.run_custom(|arg| motion::track_player(arg));
+                self.planner.run_custom(move |arg| motion::player_controls(arg, player_control_direction));
+            },
+            motion::MovementPhase::Moving => self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt))
+        }
 
         let exiting_state: bool;
+
         {
             let world = self.planner.mut_world();
             let victory = victory::determine_victory_from_goal(world);
             let gameover = victory::determine_gameover_from_hazard(world);
             exiting_state = victory | gameover;
+
+            self.phase = motion::determine_movement_phase(world, self.phase);
         }
 
         self.planner.wait();

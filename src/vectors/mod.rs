@@ -21,6 +21,14 @@ impl Vector2<f32>
     }
 }
 
+impl Vector2<i32>
+{
+    pub fn to_f32(self) -> Vector2<f32>
+    {
+        vec2(self.components[0] as f32, self.components[1] as f32)
+    }
+}
+
 pub fn vec2<T: Copy>(x: T, y: T) -> Vector2<T>
 {
     Vector2 { components: [x, y]}

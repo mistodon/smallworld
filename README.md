@@ -73,3 +73,15 @@ Took a break - just started working again. Going to add a lose condition now - w
 
 [2017-04-22 19:32]:
 OK so now when you touch the door, or the guy, the level restarts.
+
+[2017-04-22 20:07]:
+Took a break, then made things turn-based, so the stalker should move in lockstep with the player.
+
+So now is probably a good time to explain the eventual point of the game. Simple enough: get to the door without coming in contact with the stalker. The stalker will follow your exact movements where possible, which you can use to make a strategy about where you go next.
+
+That's the bare bones of it. If by some miracle I have time to do more, I will.
+
+[2017-04-22 20:31]:
+Alright, the shady dude follows you around now, but unfortunately it's impossible to collide with him since you're moving in perfect lockstep (you always change tiles at the same time and usually don't have the exact same destination).
+
+To fix this, I'm probably going to put a slight delay on the stalker's movement - like half a step.
