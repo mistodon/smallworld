@@ -94,6 +94,8 @@ impl State for GameState
             for (position, sprite) in (&position, &sprite).join()
             {
                 let (uv_offset, uv_scale) = self.atlas.get_uv_offset_scale(sprite.region.components[0], sprite.region.components[1]);
+                let pixel_position = (position.0 * game.tile_size as f32).round_i32();
+                let rounded_position = vec2(pixel_position.components[0] as f32, pixel_position.components[1] as f32) * (1.0 / game.tile_size as f32);
 
                 target.draw(
                     &self.mesh.0,
@@ -103,7 +105,7 @@ impl State for GameState
                     {
                         projection: projection,
                         colormap: colormap,
-                        position: position.0.components,
+                        position: rounded_position.components,
                         uv_offset: uv_offset,
                         uv_scale: uv_scale
                     },
