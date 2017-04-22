@@ -55,3 +55,6 @@ Got multiple entities on screen now. Not really using a proper "system" for it, 
 
 [2017-04-22 17:12]:
 Added motion system from a position to a destination. Also spent probably too long on vector operators - use a stock library next time.
+
+[2017-04-22 17:43]:
+Very basic player movement. You can slide around the screen with the arrow keys.

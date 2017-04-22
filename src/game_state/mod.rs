@@ -30,6 +30,7 @@ impl State for GameState
         world.register::<Position>();
         world.register::<Sprite>();
         world.register::<Motion>();
+        world.register::<Player>();
 
         world.create_now()
             .with(Position(vec2(0.0, 0.0)))
@@ -39,13 +40,14 @@ impl State for GameState
         world.create_now()
             .with(Position(vec2(2.0, 0.0)))
             .with(Sprite)
-            .with(Motion::default())
+            .with(Motion { destination: None, speed: 4.0 })
+            .with(Player)
             .build();
 
         world.create_now()
             .with(Position(vec2(4.0, 0.0)))
             .with(Sprite)
-            .with(Motion { destination: Some(motion::Destination { position: vec2(4.0, 4.0), direction: vec2(0.0, 1.0) }) })
+            .with(Motion { destination: Some(motion::Destination { position: vec2(4.0, 4.0), direction: vec2(0.0, 1.0) }), speed: 4.0 })
             .build();
 
         let planner = Planner::new(world);
@@ -63,7 +65,10 @@ impl State for GameState
     fn update(&mut self, dt: f64, game: &mut Game) -> bool
     {
         self.time += dt;
+        let player_control_direction = game.input.dir();
+        println!("{:?}", player_control_direction);
 
+        self.planner.run_custom(move |arg| motion::player_controls(arg, player_control_direction));
         self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt));
 
         self.planner.wait();
@@ -85,7 +90,7 @@ impl State for GameState
         {
             let world = self.planner.mut_world();
             let (position, sprite) = (world.read::<Position>().pass(), world.read::<Sprite>().pass());
-            for (position, sprite) in (&position, &sprite).join()
+            for (position, _) in (&position, &sprite).join()
             {
                 target.draw(
                     &self.mesh.0,

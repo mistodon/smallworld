@@ -4,7 +4,7 @@ extern crate image;
 extern crate specs;
 
 use glium::{DisplayBuild};
-use glium::glutin::{Event, WindowBuilder};
+use glium::glutin::{Event, WindowBuilder, VirtualKeyCode, ElementState};
 
 use std::time::{Instant};
 
@@ -43,17 +43,45 @@ pub fn run_game(scale: u32)
         let dt = (delta.as_secs() as f64) + (delta.subsec_nanos() as f64) / 1000_000_000.0;
         previous_frame_time = current_time;
 
-        for event in display.poll_events()
+        let mut quitting = false;
+
         {
-            match event
+            for event in display.poll_events()
             {
-                Event::Closed => return,
-                _ => ()
+                match event
+                {
+                    Event::KeyboardInput(state, _, Some(key)) =>
+                        match state
+                        {
+                            ElementState::Pressed =>
+                                match key
+                                {
+                                    VirtualKeyCode::Left => game.input.left = true,
+                                    VirtualKeyCode::Right => game.input.right = true,
+                                    VirtualKeyCode::Up => game.input.up = true,
+                                    VirtualKeyCode::Down => game.input.down = true,
+                                    VirtualKeyCode::Escape => quitting = true,
+                                    _ => ()
+                                },
+                            ElementState::Released =>
+                                match key
+                                {
+                                    VirtualKeyCode::Left => game.input.left = false,
+                                    VirtualKeyCode::Right => game.input.right = false,
+                                    VirtualKeyCode::Up => game.input.up = false,
+                                    VirtualKeyCode::Down => game.input.down = false,
+                                    _ => ()
+                                }
+                        },
+                    Event::Closed => quitting = true,
+                    _ => ()
+                }
             }
         }
 
-        let keep_going = game_state.update(dt, &mut game);
-        if !keep_going
+        let state_continue = game_state.update(dt, &mut game);
+
+        if quitting || !state_continue
         {
             return;
         }

@@ -13,6 +13,14 @@ pub struct Vector2<T: Copy>
     pub components: [T; 2]
 }
 
+impl Vector2<f32>
+{
+    pub fn round_i32(self) -> Vector2<i32>
+    {
+        vec2(self.components[0].round() as i32, self.components[1].round() as i32)
+    }
+}
+
 pub fn vec2<T: Copy>(x: T, y: T) -> Vector2<T>
 {
     Vector2 { components: [x, y]}
