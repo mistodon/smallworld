@@ -58,3 +58,6 @@ Added motion system from a position to a destination. Also spent probably too lo
 
 [2017-04-22 17:43]:
 Very basic player movement. You can slide around the screen with the arrow keys.
+
+[2017-04-22 18:08]:
+Sprites now have a texture region so that they can sample the atlas at different points. Rather than make each entity have its own mesh with its own UVs, I'm just putting a UV offset/scale in the vertex shader.

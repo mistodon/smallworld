@@ -13,7 +13,7 @@ pub struct GameState
 {
     shader: Shader,
     mesh: Mesh,
-    texture: Texture,
+    atlas: TextureAtlas,
     planner: Planner<()>,
     time: f64
 }
@@ -24,7 +24,7 @@ impl State for GameState
     {
         let shader = load_shader(display, &get_asset_string("shaders/sprite.vs"), &get_asset_string("shaders/sprite.fs"));
         let mesh = quad_mesh(display);
-        let texture = load_texture(display, &get_asset_bytes("atlas.png"));
+        let atlas = load_texture_atlas(display, &get_asset_bytes("atlas.png"), 16);
 
         let mut world = World::new();
         world.register::<Position>();
@@ -34,19 +34,19 @@ impl State for GameState
 
         world.create_now()
             .with(Position(vec2(0.0, 0.0)))
-            .with(Sprite)
+            .with(Sprite { region: vec2(0, 2) })
             .build();
 
         world.create_now()
             .with(Position(vec2(2.0, 0.0)))
-            .with(Sprite)
+            .with(Sprite { region: vec2(0, 0) })
             .with(Motion { destination: None, speed: 4.0 })
             .with(Player)
             .build();
 
         world.create_now()
             .with(Position(vec2(4.0, 0.0)))
-            .with(Sprite)
+            .with(Sprite { region: vec2(0, 1) })
             .with(Motion { destination: Some(motion::Destination { position: vec2(4.0, 4.0), direction: vec2(0.0, 1.0) }), speed: 4.0 })
             .build();
 
@@ -56,7 +56,7 @@ impl State for GameState
         {
             shader: shader,
             mesh: mesh,
-            texture: texture,
+            atlas: atlas,
             planner: planner,
             time: 0.0
         }
@@ -66,7 +66,6 @@ impl State for GameState
     {
         self.time += dt;
         let player_control_direction = game.input.dir();
-        println!("{:?}", player_control_direction);
 
         self.planner.run_custom(move |arg| motion::player_controls(arg, player_control_direction));
         self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt));
@@ -78,9 +77,9 @@ impl State for GameState
 
     fn draw(&mut self, target: &mut Frame, game: &mut Game)
     {
-        target.clear_color_srgb_and_depth((0.0, 0.0, self.time as f32, 1.0), 1.0);
+        target.clear_color_srgb_and_depth((0.75, 0.75, 0.75, 1.0), 1.0);
 
-        let colormap = Sampler::new(&self.texture)
+        let colormap = Sampler::new(&self.atlas.texture)
             .minify_filter(MinifySamplerFilter::Nearest)
             .magnify_filter(MagnifySamplerFilter::Nearest)
             .wrap_function(SamplerWrapFunction::Clamp);
@@ -90,8 +89,10 @@ impl State for GameState
         {
             let world = self.planner.mut_world();
             let (position, sprite) = (world.read::<Position>().pass(), world.read::<Sprite>().pass());
-            for (position, _) in (&position, &sprite).join()
+            for (position, sprite) in (&position, &sprite).join()
             {
+                let (uv_offset, uv_scale) = self.atlas.get_uv_offset_scale(sprite.region.components[0], sprite.region.components[1]);
+
                 target.draw(
                     &self.mesh.0,
                     &self.mesh.1,
@@ -100,7 +101,9 @@ impl State for GameState
                     {
                         projection: projection,
                         colormap: colormap,
-                        position: position.0.components
+                        position: position.0.components,
+                        uv_offset: uv_offset,
+                        uv_scale: uv_scale
                     },
                     &DrawParameters
                     {

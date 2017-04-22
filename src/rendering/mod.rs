@@ -11,6 +11,24 @@ pub type Shader = Program;
 pub type Texture = Texture2d;
 pub type Mesh = (VertexBufferAny, IndexBufferAny);
 
+pub struct TextureAtlas
+{
+    pub texture: Texture,
+    pub width_tiles: u32,
+    pub height_tiles: u32
+}
+
+impl TextureAtlas
+{
+    pub fn get_uv_offset_scale(&self, tx: u32, ty: u32) -> ([f32; 2], [f32; 2])
+    {
+        let u = (tx as f32) / (self.width_tiles as f32);
+        let v = (ty as f32) / (self.height_tiles as f32);
+        let su = 1.0 / (self.width_tiles as f32);
+        let sv = 1.0 / (self.height_tiles as f32);
+        ([u, v], [su, sv])
+    }
+}
 
 #[derive(Copy, Clone)]
 struct Vertex
@@ -51,12 +69,21 @@ pub fn quad_mesh(display: &Display) -> Mesh
     (vertex_buffer.into(), index_buffer.into())
 }
 
-pub fn load_texture(display: &Display, bytes: &[u8]) -> Texture
+pub fn load_texture(display: &Display, bytes: &[u8]) -> (Texture, (u32, u32))
 {
     let image = load_from_memory_with_format(bytes, ImageFormat::PNG).expect("Failed to decode image").to_rgba();
     let image_dimensions = image.dimensions();
     let image = RawImage2d::from_raw_rgba_reversed(image.into_raw(), image_dimensions);
-    Texture2d::new(display, image).expect("Failed to load texture")
+    let texture = Texture2d::new(display, image).expect("Failed to load texture");
+    (texture, image_dimensions)
+}
+
+pub fn load_texture_atlas(display: &Display, bytes: &[u8], tile_size: u32) -> TextureAtlas
+{
+    let (texture, dimensions) = load_texture(display, bytes);
+    let (w, h) = dimensions;
+    let (tw, th) = (w / tile_size, h / tile_size);
+    TextureAtlas { texture: texture, width_tiles: tw, height_tiles: th }
 }
 
 pub fn calculate_projection(resolution: (u32, u32), tile_size: u32) -> [f32; 2]
