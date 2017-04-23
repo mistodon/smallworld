@@ -129,3 +129,6 @@ For the splash screen / ending screen, I'm just using a single static image - so
 
 [2017-04-23 13:56]:
 Added ending screen.
+
+[2017-04-23 15:13]:
+Added gates and buttons which open them, and a couple of levels for them.

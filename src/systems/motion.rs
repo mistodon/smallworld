@@ -201,14 +201,21 @@ pub fn track_player(arg: RunArg)
                         {
                             for (position, collision) in (&positions, &collisions).join()
                             {
-                                if position.0.round_i32() == next_step && collision == &Collision::Pushable
+                                if position.0.round_i32() == next_step
                                 {
-                                    let push_dest = next_step + dir;
-                                    for (position, collision) in (&positions, &collisions).join()
+                                    if collision == &Collision::Obstacle
                                     {
-                                        if position.0.round_i32() == push_dest && collision != &Collision::Passable
+                                        failed_to_move = true;
+                                    }
+                                    else if collision == &Collision::Pushable
+                                    {
+                                        let push_dest = next_step + dir;
+                                        for (position, collision) in (&positions, &collisions).join()
                                         {
-                                            failed_to_move = true;
+                                            if position.0.round_i32() == push_dest && collision != &Collision::Passable
+                                            {
+                                                failed_to_move = true;
+                                            }
                                         }
                                     }
                                 }

@@ -36,6 +36,8 @@ impl State for GameState
         world.register::<Hazard>();
         world.register::<Goal>();
         world.register::<PlayerTracker>();
+        world.register::<Button>();
+        world.register::<ButtonGate>();
 
         let camera_pos: Vector2<f32>;
         {
@@ -91,6 +93,25 @@ impl State for GameState
                     .with(Collision::Pushable)
                     .build();
             }
+
+            for button in &level.buttons
+            {
+                world.create_now()
+                    .with(Position(*button))
+                    .with(Sprite { region: vec2(2, 3), layer: visual::BG_LAYER })
+                    .with(Button(false))
+                    .build();
+            }
+
+            for gate in &level.gates
+            {
+                world.create_now()
+                    .with(Position(*gate))
+                    .with(Sprite { region: vec2(0, 4), layer: visual::BG_LAYER })
+                    .with(Collision::Obstacle)
+                    .with(ButtonGate(false))
+                    .build();
+            }
         }
 
         let planner = Planner::new(world);
@@ -111,10 +132,15 @@ impl State for GameState
         self.time += dt;
         let player_control_direction = game.input.dir();
 
+        self.planner.run_custom(|arg| buttons::check_button_presses(arg));
+        self.planner.run_custom(|arg| buttons::open_and_close_gates(arg));
+
         self.planner.run_custom(|arg| motion::track_player(arg));
         self.planner.run_custom(move |arg| motion::player_controls(arg, player_control_direction));
         self.planner.run_custom(|arg| motion::push_stuff(arg));
         self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt));
+
+        self.planner.run_custom(|arg| buttons::update_gate_sprites(arg));
 
         let exiting_state: bool;
 
