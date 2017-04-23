@@ -119,11 +119,11 @@ pub fn run_state<S: State>(display: &Display, game: &mut Game) -> bool
             {
                 game.current_level += 1;
             }
-            if reset_key_pressed || next_level_key_pressed
-            {
-                game.levels = assets::load_levels("levels.yaml");
-                return true;
-            }
+        }
+        if reset_key_pressed || next_level_key_pressed
+        {
+            game.levels = assets::load_levels("levels.yaml");
+            return true;
         }
 
         let state_continue = game_state.update(dt, game);
@@ -136,7 +136,7 @@ pub fn run_state<S: State>(display: &Display, game: &mut Game) -> bool
         {
             return false;
         }
-        
+
         if !state_continue
         {
             return true;

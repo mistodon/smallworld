@@ -1,5 +1,7 @@
 use std::cmp::max;
+use std::env::current_exe;
 use std::fs::File;
+use std::io;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use find_folder::{Search};
@@ -7,11 +9,44 @@ use serde_yaml;
 
 use vectors::*;
 
+
+pub fn assets_folder() -> io::Result<PathBuf>
+{
+    if cfg!(debug_assertions)
+    {
+        debug_path_to_assets()
+    }
+    else
+    {
+        release_path_to_assets()
+    }
+}
+
+
+fn debug_path_to_assets() -> io::Result<PathBuf>
+{
+    let mut path = current_exe()?;
+    path.pop();
+    path.pop();
+    path.pop();
+    path.push("assets");
+    Ok(path)
+}
+
+
+fn release_path_to_assets() -> io::Result<PathBuf>
+{
+    let mut path = current_exe()?;
+    path.pop();
+    path.push("assets");
+    Ok(path)
+}
+
 pub fn get_asset_path<P>(path: P) -> PathBuf
     where P: AsRef<Path>
 {
-    let assets = Search::ParentsThenKids(3, 3).for_folder("assets").expect("Could not find assets folder");
-    let filepath = assets.join(path.as_ref());
+    let mut filepath = assets_folder().expect("Could not find assets folder");
+    filepath.push(path.as_ref());
     filepath
 }
 

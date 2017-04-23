@@ -135,3 +135,6 @@ Added gates and buttons which open them, and a couple of levels for them.
 
 [2017-04-23 17:15]:
 Kind of running out of steam at this point. I'm not sure I can be bothered writing music or adding sound. I'm thinking I might add a tiny bit of polish to the transitions and then focus on getting builds done.
+
+[2017-04-23 20:54]:
+The find_folder crate seems to be acting up, so I'm just going to do something dumber.
