@@ -100,3 +100,22 @@ Sorting sprites by layer now so I can put a door in front of a wall.
 
 [2017-04-23 01:48]:
 Added push blocks.
+
+[2017-04-23 03:46]:
+Oh geez. So having the movement code for the player and stalker separate turned into a whole horrifying deal where I now have three different places checking to see if something is in the way of a push block.
+
+On the bright side, it seems to work, and I added a couple of levels.
+
+[2017-04-23 04:07]:
+To do tomorrow, roughly in priority order:
+
+1.  Fix moving-into-box bug
+2.  Splash screen
+3.  Ending screen
+4.  Music
+5.  Sound effects
+6.  Buttons/gates
+7.  More levels
+8.  Animation
+9.  Prettier sprites
+10. Even more levels
