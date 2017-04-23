@@ -119,3 +119,7 @@ To do tomorrow, roughly in priority order:
 8.  Animation
 9.  Prettier sprites
 10. Even more levels
+11. Release builds across platforms
+
+[2017-04-23 13:16]:
+Partially fixed the moving-into-box thing. Think if I was going to clean up all this code, I'd model position differently. At the moment everything has a floating point world position, and tile position is inferred from that. I think a better system would have been to store the tile position separately, update them instantaneously, and ensure that no two things share a tile position on their move.

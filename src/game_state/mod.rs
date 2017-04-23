@@ -53,8 +53,9 @@ impl State for GameState
                 .with(Position(level.stalker_pos))
                 .with(Sprite { region: vec2(0, 1), layer: visual::ACTOR_LAYER })
                 .with(Motion::new(4.0))
+                .with(Collision::BlocksPush)
                 .with(Hazard)
-                .with(PlayerTracker::new(0.15, level.initial_stalker_path.clone()))
+                .with(PlayerTracker::new(0.05, level.initial_stalker_path.clone()))
                 .build();
 
             for door in &level.doors
@@ -67,6 +68,7 @@ impl State for GameState
                 world.create_now()
                     .with(Position(*door))
                     .with(Sprite { region: vec2(0, 3), layer: visual::OBJECT_LAYER })
+                    .with(Collision::BlocksPush)
                     .with(Goal)
                     .build();
             }

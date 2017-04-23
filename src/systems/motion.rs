@@ -50,6 +50,7 @@ component!(Player);
 pub enum Collision
 {
     Passable,
+    BlocksPush,
     Pushable,
     Obstacle
 }
@@ -250,6 +251,11 @@ pub fn push_stuff(arg: RunArg)
     {
         if let Some(destination) = motion_a.destination
         {
+            if motion_a.delay_remaining > 0.0
+            {
+                continue;
+            }
+
             let dest_tile = destination.position.round_i32();
 
             for (entity, motion_b, position, collision) in (&entities, &motion, &position, &collision).join()
