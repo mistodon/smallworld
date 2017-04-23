@@ -39,7 +39,7 @@ impl State for GameState
 
         let camera_pos: Vector2<f32>;
         {
-            let level = &game.levels[0];
+            let level = &game.levels[game.current_level];
             camera_pos = level.midpoint;
 
             world.create_now()
@@ -79,6 +79,16 @@ impl State for GameState
                     .with(Collision::Obstacle)
                     .build();
             }
+
+            for push_block in &level.push_blocks
+            {
+                world.create_now()
+                    .with(Position(*push_block))
+                    .with(Motion::new(4.0))
+                    .with(Sprite { region: vec2(1, 3), layer: visual::OBJECT_LAYER })
+                    .with(Collision::Pushable)
+                    .build();
+            }
         }
 
         let planner = Planner::new(world);
@@ -101,6 +111,7 @@ impl State for GameState
 
         self.planner.run_custom(|arg| motion::track_player(arg));
         self.planner.run_custom(move |arg| motion::player_controls(arg, player_control_direction));
+        self.planner.run_custom(|arg| motion::push_stuff(arg));
         self.planner.run_custom(move |arg| motion::move_towards_destinations(arg, dt));
 
         let exiting_state: bool;
@@ -109,6 +120,14 @@ impl State for GameState
             let world = self.planner.mut_world();
             let victory = victory::determine_victory_from_goal(world);
             let gameover = victory::determine_gameover_from_hazard(world);
+            if victory
+            {
+                game.current_level += 1;
+                if game.current_level >= game.levels.len()
+                {
+                    game.complete = true;
+                }
+            }
             exiting_state = victory | gameover;
         }
 

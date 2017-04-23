@@ -74,7 +74,7 @@ impl PlayerTracker
 
 pub fn player_controls(arg: RunArg, dir: Vector2<f32>)
 {
-    let (mut motion, positions, mut player, collision) = arg.fetch(|w| (w.write::<Motion>(), w.read::<Position>(), w.write::<Player>(), w.read::<Collision>()));
+    let (mut motion, positions, mut player, collisions) = arg.fetch(|w| (w.write::<Motion>(), w.read::<Position>(), w.write::<Player>(), w.read::<Collision>()));
 
     for (motion, position, player) in (&mut motion, &positions, &mut player).join()
     {
@@ -89,13 +89,28 @@ pub fn player_controls(arg: RunArg, dir: Vector2<f32>)
 
         let obstructed = {
             let mut obstructed = false;
-            for (position, collision) in (&positions, &collision).join()
+            for (position, collision) in (&positions, &collisions).join()
             {
                 let pos_tile = position.0.round_i32();
-                if pos_tile == dest_tile && collision == &Collision::Obstacle
+                if pos_tile == dest_tile
                 {
-                    obstructed = true;
-                    break;
+                    if collision == &Collision::Obstacle
+                    {
+                        obstructed = true;
+                        break;
+                    }
+                    else if collision == &Collision::Pushable
+                    {
+                        // Fucked up bad. Have to check for pushing things in like three places
+                        let push_dest = dest_tile + dir.round_i32();
+                        for (position, collision) in (&positions, &collisions).join()
+                        {
+                            if position.0.round_i32() == push_dest && collision != &Collision::Passable
+                            {
+                                obstructed = true;
+                            }
+                        }
+                    }
                 }
             }
             obstructed
@@ -180,6 +195,55 @@ pub fn track_player(arg: RunArg)
             else if tracker.moves == player_moves
             {
                 motion.delay_remaining = tracker.delay;
+            }
+        }
+    }
+}
+
+pub fn push_stuff(arg: RunArg)
+{
+    let (entities, mut motion, position, collision) = arg.fetch(|w| (w.entities(), w.write::<Motion>(), w.read::<Position>(), w.read::<Collision>()));
+
+    let mut pushes = Vec::new();
+
+    for motion_a in (&motion).join()
+    {
+        if let Some(destination) = motion_a.destination
+        {
+            let dest_tile = destination.position.round_i32();
+
+            for (entity, motion_b, position, collision) in (&entities, &motion, &position, &collision).join()
+            {
+                if collision != &Collision::Pushable || motion_b.destination.is_some()
+                {
+                    continue;
+                }
+
+                let pos = position.0.round_i32();
+                if pos == dest_tile
+                {
+                    let push_dir = destination.direction;
+                    let push_dest = position.0 + push_dir;
+                    pushes.push((entity, push_dest, push_dir));
+                }
+            }
+        }
+    }
+
+    for (entity, push_dest, push_dir) in pushes
+    {
+        let mut blocked = false;
+        for (position, collision) in (&position, &collision).join()
+        {
+            let pos = position.0.round_i32();
+            blocked |= pos == push_dest.round_i32() && collision != &Collision::Passable;
+        }
+
+        if !blocked
+        {
+            if let Some(motion) = motion.get_mut(entity)
+            {
+                motion.destination = Some(Destination { position: push_dest, direction: push_dir });
             }
         }
     }

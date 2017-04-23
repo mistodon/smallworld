@@ -41,7 +41,7 @@ pub fn run_game(scale: u32)
     loop
     {
         let keep_going = run_state(&display, &mut game);
-        if !keep_going
+        if !keep_going || game.complete
         {
             break;
         }
@@ -62,6 +62,7 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
 
         let mut quitting = false;
         let mut reset_key_pressed = false;
+        let mut next_level_key_pressed = false;
 
         {
             for event in display.poll_events()
@@ -79,6 +80,7 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
                                     VirtualKeyCode::Up => game.input.up = true,
                                     VirtualKeyCode::Down => game.input.down = true,
                                     VirtualKeyCode::R => reset_key_pressed = true,
+                                    VirtualKeyCode::N => next_level_key_pressed = true,
                                     VirtualKeyCode::Escape => quitting = true,
                                     _ => ()
                                 },
@@ -98,10 +100,17 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
             }
         }
 
-        if cfg!(debug_assertions) && reset_key_pressed
+        if cfg!(debug_assertions)
         {
-            game.levels = assets::load_levels("levels.yaml");
-            return true;
+            if next_level_key_pressed
+            {
+                game.current_level += 1;
+            }
+            if reset_key_pressed || next_level_key_pressed
+            {
+                game.levels = assets::load_levels("levels.yaml");
+                return true;
+            }
         }
 
         if quitting

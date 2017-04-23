@@ -6,7 +6,9 @@ pub struct Game
     pub resolution: (u32, u32),
     pub tile_size: u32,
     pub input: GameInput,
-    pub levels: Vec<Level>
+    pub levels: Vec<Level>,
+    pub current_level: usize,
+    pub complete: bool
 }
 
 #[derive(Default)]
@@ -27,7 +29,9 @@ impl Game
             resolution: resolution,
             tile_size: 16,
             input: GameInput::default(),
-            levels: assets::load_levels("levels.yaml")
+            levels: assets::load_levels("levels.yaml"),
+            current_level: 0,
+            complete: false
         }
     }
 }

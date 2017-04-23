@@ -50,6 +50,7 @@ pub fn load_levels<P>(path: P) -> Vec<Level>
         let mut stalker_pos = None;
         let mut doors = Vec::new();
         let mut blocks = Vec::new();
+        let mut push_blocks = Vec::new();
         let mut width = 0;
 
         for (inv_y, row) in leveldata.tiles.iter().enumerate()
@@ -64,6 +65,7 @@ pub fn load_levels<P>(path: P) -> Vec<Level>
                     "P" => player_pos = Some(tilepos),
                     "S" => stalker_pos = Some(tilepos),
                     "D" => doors.push(tilepos),
+                    "B" => push_blocks.push(tilepos),
                     "=" => blocks.push((0, tilepos)),
                     ";" => blocks.push((1, tilepos)),
                     "." => (),
@@ -99,6 +101,7 @@ pub fn load_levels<P>(path: P) -> Vec<Level>
             stalker_pos: stalker_pos,
             doors: doors,
             blocks: blocks,
+            push_blocks: push_blocks,
             initial_stalker_path: initial_stalker_path
         });
     }
@@ -127,5 +130,6 @@ pub struct Level
     pub stalker_pos: Vector2<f32>,
     pub doors: Vec<Vector2<f32>>,
     pub blocks: Vec<(u32, Vector2<f32>)>,
+    pub push_blocks: Vec<Vector2<f32>>,
     pub initial_stalker_path: Vec<Vector2<i32>>
 }
