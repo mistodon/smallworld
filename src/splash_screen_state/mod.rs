@@ -16,11 +16,12 @@ pub struct SplashScreenState
 
 impl State for SplashScreenState
 {
-    fn new(display: &Display, _game: &mut Game) -> Self
+    fn new(display: &Display, game: &mut Game) -> Self
     {
         let shader = load_shader(display, &get_asset_string("shaders/splash.vs"), &get_asset_string("shaders/splash.fs"));
         let mesh = quad_mesh(display);
-        let splash_texture = load_texture(display, &get_asset_bytes("splash_screen.png")).0;
+        let splash_texture_name = if game.current_state == StateType::EndingState { "ending_screen.png" } else { "splash_screen.png" };
+        let splash_texture = load_texture(display, &get_asset_bytes(splash_texture_name)).0;
 
         SplashScreenState
         {
@@ -38,7 +39,11 @@ impl State for SplashScreenState
         let exiting_state = game.input.any_key_pressed;
         if exiting_state
         {
-            game.current_state = StateType::GameState;
+            game.current_state = match game.current_state
+            {
+                StateType::SplashScreen => StateType::GameState,
+                _ => StateType::SplashScreen
+            }
         }
 
         !exiting_state

@@ -45,9 +45,10 @@ pub fn run_game(scale: u32)
         let keep_going = match game.current_state
         {
             StateType::SplashScreen => run_state::<SplashScreenState>(&display, &mut game),
+            StateType::EndingState => run_state::<SplashScreenState>(&display, &mut game),
             StateType::GameState => run_state::<GameState>(&display, &mut game)
         };
-        if !keep_going || game.complete
+        if !keep_going
         {
             break;
         }

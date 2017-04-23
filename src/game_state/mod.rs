@@ -128,6 +128,8 @@ impl State for GameState
                 if game.current_level >= game.levels.len()
                 {
                     game.complete = true;
+                    game.current_level = 0;
+                    game.current_state = StateType::EndingState;
                 }
             }
             exiting_state = victory | gameover;

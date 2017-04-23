@@ -10,8 +10,10 @@ pub trait State
     fn draw(&mut self, target: &mut Frame, game: &mut Game);
 }
 
+#[derive(PartialEq, Eq)]
 pub enum StateType
 {
     SplashScreen,
-    GameState
+    GameState,
+    EndingState
 }

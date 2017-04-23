@@ -123,3 +123,9 @@ To do tomorrow, roughly in priority order:
 
 [2017-04-23 13:16]:
 Partially fixed the moving-into-box thing. Think if I was going to clean up all this code, I'd model position differently. At the moment everything has a floating point world position, and tile position is inferred from that. I think a better system would have been to store the tile position separately, update them instantaneously, and ensure that no two things share a tile position on their move.
+
+[2017-04-23 13:46]:
+For the splash screen / ending screen, I'm just using a single static image - so I don't have to think about it too much.
+
+[2017-04-23 13:56]:
+Added ending screen.
