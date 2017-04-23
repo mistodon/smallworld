@@ -132,3 +132,6 @@ Added ending screen.
 
 [2017-04-23 15:13]:
 Added gates and buttons which open them, and a couple of levels for them.
+
+[2017-04-23 17:15]:
+Kind of running out of steam at this point. I'm not sure I can be bothered writing music or adding sound. I'm thinking I might add a tiny bit of polish to the transitions and then focus on getting builds done.
