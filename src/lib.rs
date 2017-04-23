@@ -16,14 +16,16 @@ pub mod game;
 pub mod game_state;
 pub mod macros;
 pub mod rendering;
+pub mod splash_screen_state;
 pub mod state;
 pub mod systems;
 pub mod vectors;
 
 use game::Game;
 use game_state::GameState;
+use splash_screen_state::SplashScreenState;
 use rendering::Display;
-use state::State;
+use state::{State, StateType};
 
 pub fn run_game(scale: u32)
 {
@@ -40,7 +42,11 @@ pub fn run_game(scale: u32)
 
     loop
     {
-        let keep_going = run_state(&display, &mut game);
+        let keep_going = match game.current_state
+        {
+            StateType::SplashScreen => run_state::<SplashScreenState>(&display, &mut game),
+            StateType::GameState => run_state::<GameState>(&display, &mut game)
+        };
         if !keep_going || game.complete
         {
             break;
@@ -48,9 +54,9 @@ pub fn run_game(scale: u32)
     }
 }
 
-pub fn run_state(display: &Display, game: &mut Game) -> bool
+pub fn run_state<S: State>(display: &Display, game: &mut Game) -> bool
 {
-    let mut game_state = GameState::new(display, game);
+    let mut game_state = S::new(display, game);
     let mut previous_frame_time = Instant::now();
 
     loop
@@ -63,6 +69,7 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
         let mut quitting = false;
         let mut reset_key_pressed = false;
         let mut next_level_key_pressed = false;
+        let mut any_key_pressed = false;
 
         {
             for event in display.poll_events()
@@ -73,6 +80,8 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
                         match state
                         {
                             ElementState::Pressed =>
+                            {
+                                any_key_pressed = true;
                                 match key
                                 {
                                     VirtualKeyCode::Left => game.input.left = true,
@@ -83,7 +92,8 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
                                     VirtualKeyCode::N => next_level_key_pressed = true,
                                     VirtualKeyCode::Escape => quitting = true,
                                     _ => ()
-                                },
+                                }
+                            },
                             ElementState::Released =>
                                 match key
                                 {
@@ -98,6 +108,8 @@ pub fn run_state(display: &Display, game: &mut Game) -> bool
                     _ => ()
                 }
             }
+
+            game.input.any_key_pressed = any_key_pressed;
         }
 
         if cfg!(debug_assertions)

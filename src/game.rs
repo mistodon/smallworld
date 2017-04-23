@@ -1,4 +1,5 @@
 use assets::{self, Level};
+use state::{StateType};
 use vectors::*;
 
 pub struct Game
@@ -6,6 +7,7 @@ pub struct Game
     pub resolution: (u32, u32),
     pub tile_size: u32,
     pub input: GameInput,
+    pub current_state: StateType,
     pub levels: Vec<Level>,
     pub current_level: usize,
     pub complete: bool
@@ -17,7 +19,8 @@ pub struct GameInput
     pub left: bool,
     pub right: bool,
     pub up: bool,
-    pub down: bool
+    pub down: bool,
+    pub any_key_pressed: bool
 }
 
 impl Game
@@ -29,6 +32,7 @@ impl Game
             resolution: resolution,
             tile_size: 16,
             input: GameInput::default(),
+            current_state: StateType::SplashScreen,
             levels: assets::load_levels("levels.yaml"),
             current_level: 0,
             complete: false
