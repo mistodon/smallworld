@@ -68,6 +68,7 @@ pub fn load_levels<P>(path: P) -> Vec<Level>
                     "B" => push_blocks.push(tilepos),
                     "=" => blocks.push((0, tilepos)),
                     ";" => blocks.push((1, tilepos)),
+                    "+" => blocks.push((2, tilepos)),
                     "." => (),
                     other => panic!(format!("Found unparsable character in level file: '{}'", other))
                 }

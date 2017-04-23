@@ -162,18 +162,19 @@ pub fn move_towards_destinations(arg: RunArg, dt: f64)
 
 pub fn track_player(arg: RunArg)
 {
-    let (mut tracker, mut motion, position, player) = arg.fetch(|w| (w.write::<PlayerTracker>(), w.write::<Motion>(), w.read::<Position>(), w.read::<Player>()));
+    let (mut tracker, mut motion, positions, player, collisions) = arg.fetch(|w| (w.write::<PlayerTracker>(), w.write::<Motion>(), w.read::<Position>(), w.read::<Player>(), w.read::<Collision>()));
 
     // We're only going to acknowledge one player right now
     let player_pos: Vector2<i32>;
     let player_moves: u32;
     {
-        let (player, position) = (&player, &position).join().next().expect("No player found");
+        let (player, position) = (&player, &positions).join().next().expect("No player found");
         player_pos = position.0.round_i32();
         player_moves = player.moves;
     }
 
-    for (tracker, motion, position) in (&mut tracker, &mut motion, &position).join()
+    // Spaghetti incoming
+    for (tracker, motion, position) in (&mut tracker, &mut motion, &positions).join()
     {
         if tracker.steps.back() != Some(&player_pos)
         {
@@ -184,12 +185,51 @@ pub fn track_player(arg: RunArg)
         {
             if tracker.moves < player_moves
             {
-                if let Some(next_step) = tracker.steps.pop_front()
+                let pos = position.0;
+                let tile_pos = pos.round_i32();
+                let mut looking_for_move = true;
+
+                while looking_for_move
                 {
-                    let pos = position.0;
-                    let dest = next_step.to_f32();
-                    motion.move_from_to(pos, dest);
-                    tracker.moves += 1;
+                    let mut failed_to_move = false;
+
+                    if let Some(next_step) = tracker.steps.pop_front()
+                    {
+                        let dir = next_step - tile_pos;
+                        if dir.dot(dir) == 1
+                        {
+                            for (position, collision) in (&positions, &collisions).join()
+                            {
+                                if position.0.round_i32() == next_step && collision == &Collision::Pushable
+                                {
+                                    let push_dest = next_step + dir;
+                                    for (position, collision) in (&positions, &collisions).join()
+                                    {
+                                        if position.0.round_i32() == push_dest && collision != &Collision::Passable
+                                        {
+                                            failed_to_move = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            failed_to_move = true;
+                        }
+
+                        if !failed_to_move
+                        {
+                            let dest = next_step.to_f32();
+                            motion.move_from_to(pos, dest);
+                            tracker.moves += 1;
+                            looking_for_move = false;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
             else if tracker.moves == player_moves
