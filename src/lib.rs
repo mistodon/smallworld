@@ -126,19 +126,20 @@ pub fn run_state<S: State>(display: &Display, game: &mut Game) -> bool
             }
         }
 
-        if quitting
-        {
-            return false;
-        }
-
         let state_continue = game_state.update(dt, game);
-        if !state_continue
-        {
-            return true;
-        }
 
         let mut target = display.draw();
         game_state.draw(&mut target, game);
         target.finish().expect("Drawing failed");
+
+        if quitting
+        {
+            return false;
+        }
+        
+        if !state_continue
+        {
+            return true;
+        }
     }
 }
